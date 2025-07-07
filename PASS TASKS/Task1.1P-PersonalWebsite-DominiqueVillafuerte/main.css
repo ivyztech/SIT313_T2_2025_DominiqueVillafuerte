@@ -1,0 +1,213 @@
+/* NAVIGATION BAR */
+ul {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    background-color: #e140c9;
+  }
+  
+li {
+    float: left;
+  }
+  
+  li a {
+    display: block;
+    color: white;
+    text-align: center;
+    padding: 14px 16px;
+    text-decoration: none;
+  }
+  
+  li a:hover {
+    background-color: #f974ac;
+  }
+
+/* HEADER IMAGE */
+
+.header_image {
+    position: relative;
+    width: 100%;
+    height: 300px;
+    overflow: hidden;
+    margin: 0;
+  }
+  
+.header_image img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }  
+
+.overlay {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 100%;
+    width: 100%;
+    opacity: 0;
+    transition: .5s ease;
+    background-color: #b2318f;
+  }
+
+.header_image:hover .overlay {
+    opacity: 1;
+  }
+
+.text {
+    color: white;
+    font-size: 20px;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+  }
+
+/* ABOUT ME */
+.about_me {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+  }
+  
+.about_me img {
+    width: 180px;
+    height: 180px;
+    border-radius: 50%;
+    background-color: gray;
+    margin-top: 10px;
+    margin-bottom: 10px;
+  }  
+
+  .about_me h3 {
+    margin: 10px 0;
+    text-align: center;
+    color: #de34b1;
+  }
+
+  .about_me .tooltiptext {
+    visibility: hidden;
+    width: 120px;
+    background-color: rgb(54, 133, 235);
+    color: #fff;
+    text-align: center;
+    border-radius: 5px;
+    padding: 5px;
+    position: absolute;
+    z-index: 1;
+    bottom: 25%; 
+    left: 51%;
+    margin-left: -75px;
+    opacity: 0;
+    transition: opacity 0.3s;
+}
+
+.about_me:hover .tooltiptext {
+    visibility: visible;
+    opacity: 1;
+}
+
+  hr.dotted {
+    border-top: 3px dotted #d819c5;
+  }
+
+/* PROJECTS */
+.project_list {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+}
+
+.project_list h2 {
+    margin: 10px 0;
+    text-align: center;
+    color: #e652da;
+}
+
+.row {
+    display: flex;
+    flex-wrap: wrap;
+    margin: 0 -8px;
+}
+
+.column {
+    flex: 1 0 25%; 
+    padding: 8px;
+    box-sizing: border-box;
+}
+
+.content {
+    background-color: rgb(255, 255, 255);
+    padding: 5px;
+}
+
+@media screen and (max-width: 900px) {
+    .column {
+        flex: 1 0 50%; 
+    }
+}
+
+@media screen and (max-width: 500px) {
+    .column {
+        flex: 1 0 100%; 
+    }
+}
+
+.row h3 {
+    color: #d951d7;
+  }
+
+.row p {
+    color: #0e2a1e;
+  }
+
+/* IMAGES */
+.image_gallery h2 {
+    margin: 20px 0;
+    text-align: center;
+    color: #d537b3;
+}
+.row {
+    display: flex;
+    flex-wrap: wrap;
+    padding: 0 4px;
+  }
+  
+  /* Create four equal columns that sits next to each other */
+  .column {
+    flex: 25%;
+    max-width: 25%;
+    padding: 0 4px;
+  }
+  
+  .column img {
+    margin-top: 8px;
+    vertical-align: middle;
+    width: 100%;
+  }
+  
+  /* Responsive layout - makes a two column-layout instead of four columns */
+  @media screen and (max-width: 800px) {
+    .column {
+      flex: 50%;
+      max-width: 50%;
+    }
+  }
+  
+  /* Responsive layout - makes the two columns stack on top of each other instead of next to each other */
+  @media screen and (max-width: 600px) {
+    .column {
+      flex: 100%;
+      max-width: 100%;
+    }
+  }
