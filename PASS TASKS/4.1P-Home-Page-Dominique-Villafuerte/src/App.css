@@ -1,0 +1,7 @@
+.custom-button:hover, .stretched:hover {
+  opacity: 0.85; 
+}
+
+.stretched {
+  width: 100%; 
+}
