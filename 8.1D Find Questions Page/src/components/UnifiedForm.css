@@ -1,0 +1,125 @@
+/* General Form Styles */
+.form-container {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 20px;
+  background-color: #ffffff;
+  border-radius: 10px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+.form-header {
+  text-align: center;
+  font-size: 2.5em;
+  color: #333333;
+  margin-bottom: 1.5em;
+  font-family: 'Poppins', sans-serif;
+}
+
+
+/* Select Post Type Styles */
+.post-type-container {
+  padding: 10px 20px;
+  margin-bottom: 1.5em;
+  background-color: #f1f1f1;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+}
+
+.post-type-label {
+  font-size: 1.2em;
+  font-weight: bold;
+  color: #0052cc;
+  margin-right: 1em;
+  font-family: 'Roboto', sans-serif;
+}
+
+.post-type-option {
+  margin-right: 1em;
+  font-size: 1.1em;
+  color: #333;
+}
+
+.post-type-option input {
+  margin-right: 0.5em;
+  transform: scale(1.2); 
+}
+
+.post-type-option input:checked + label {
+  color: #0052cc;
+  font-weight: bold;
+}
+
+.post-type-option:hover label {
+  color: #0073e6;
+}
+
+/* Input and TextArea Styles */
+.custom-input,
+.custom-textarea {
+  width: 100%;
+  padding: 16px;
+  font-size: 1.1em;
+  border: 2px solid #ddd;
+  border-radius: 8px;
+  margin-bottom: 1.5em;
+  background-color: #f7f7f7;  
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+  box-sizing: border-box; 
+}
+
+.custom-input:focus,
+.custom-textarea:focus {
+  border-color: #0052cc;
+  box-shadow: 0 0 8px rgba(0, 82, 204, 0.2);
+  background-color: #ffffff;
+}
+
+.custom-textarea {
+  min-height: 180px;
+  resize: none;
+}
+
+.custom-input {
+  height: auto;
+}
+
+/* Label Styles */
+.form-label {
+  font-size: 1.2em;
+  font-weight: bold;
+  color: #0052cc;
+  margin-bottom: 0.5em;
+  font-family: 'Roboto', sans-serif;
+}
+
+/* Submit Button Styles */
+.submit-button {
+  background-color: #ff4500;
+  color: white;
+  font-size: 1.3em;
+  padding: 0.75em 1.5em;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.3s ease;
+  display: block;
+  width: 100%;
+  max-width: 200px;
+  margin: 2em auto 0 auto;
+  box-sizing: border-box;
+}
+
+.submit-button:hover {
+  background-color: #e03e00;
+  transform: scale(1.05);
+}
+
+.submit-button:active {
+  transform: scale(1);
+}
