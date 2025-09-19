@@ -21,7 +21,8 @@ export default function QuestionForm() {
     return e;
   };
 
-  const handleSubmit = async () => {
+  const handleSubmit = async (evt) => {
+    evt?.preventDefault?.(); // allow Enter/submit
     const e = validateForm();
     if (Object.keys(e).length) return setErrors(e);
     if (!user) return setErrors({ auth: "You must be logged in." });
@@ -48,6 +49,7 @@ export default function QuestionForm() {
       setErrors({});
       alert("Question posted!");
     } catch (err) {
+      console.error("Question post failed:", err);
       setErrors({ submit: err.message });
     } finally {
       setSaving(false);
@@ -57,7 +59,7 @@ export default function QuestionForm() {
   return (
     <div className="form-container">
       <h2 className="form-header">Question</h2>
-      <Form>
+      <Form onSubmit={handleSubmit} error={!!Object.keys(errors).length}>
         <Form.Field>
           <label className="form-label">Title</label>
           <Input
@@ -94,10 +96,10 @@ export default function QuestionForm() {
         </Form.Field>
 
         <Button
-          type="button"
+          type="submit"
           className="submit-button"
           loading={saving}
-          onClick={handleSubmit}
+          disabled={saving}
         >
           Post
         </Button>
