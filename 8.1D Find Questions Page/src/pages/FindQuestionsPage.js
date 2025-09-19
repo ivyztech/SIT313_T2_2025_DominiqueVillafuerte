@@ -1,9 +1,17 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { Card, Container, Input, Dropdown, Button, Icon } from "semantic-ui-react";
-import { collection, onSnapshot, orderBy, query, where } from "firebase/firestore";
+import {
+  collection,
+  onSnapshot,
+  orderBy,
+  query,
+  where,
+  deleteDoc,
+  doc,
+} from "firebase/firestore";
 import { db } from "../firebase";
 import { useAuth } from "../auth/AuthContext";
-import { deleteDoc, doc } from "firebase/firestore";
+import { getAuth, onAuthStateChanged } from "firebase/auth";
 import dayjs from "dayjs";
 
 const DATE_OPTIONS = [
@@ -18,25 +26,37 @@ export default function FindQuestionsPage() {
   const [tag, setTag] = useState("");
   const [dateRange, setDateRange] = useState("all");
   const [expanded, setExpanded] = useState(null);
+  const [busyId, setBusyId] = useState(null);
+  const [authReady, setAuthReady] = useState(false);
+
   const { user } = useAuth();
 
+  // Mark auth ready when Firebase has restored session
   useEffect(() => {
+    const unsub = onAuthStateChanged(getAuth(), () => setAuthReady(true));
+    return () => unsub();
+  }, []);
+
+  // Firestore subscription only once auth is ready
+  useEffect(() => {
+    if (!authReady) return;
     const q = query(
       collection(db, "posts"),
       where("type", "==", "question"),
       orderBy("createdAt", "desc")
     );
-    const unsub = onSnapshot(q, (snap) => {
-      const rows = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
-      setRaw(rows);
-    });
+    const unsub = onSnapshot(
+      q,
+      (snap) => setRaw(snap.docs.map((d) => ({ id: d.id, ...d.data() }))),
+      (err) => console.error("onSnapshot error:", err)
+    );
     return () => unsub();
-  }, []);
+  }, [authReady]);
 
   const allTags = useMemo(() => {
     const s = new Set();
-    raw.forEach(r => (r.tags || []).forEach(t => s.add(t)));
-    return [...s].sort().map(t => ({ key: t, text: t, value: t }));
+    raw.forEach((r) => (r.tags || []).forEach((t) => s.add(t)));
+    return [...s].sort().map((t) => ({ key: t, text: t, value: t }));
   }, [raw]);
 
   const filtered = useMemo(() => {
@@ -44,20 +64,25 @@ export default function FindQuestionsPage() {
 
     if (search.trim()) {
       const s = search.trim().toLowerCase();
-      rows = rows.filter(r =>
-        (r.title || "").toLowerCase().includes(s) ||
-        (r.description || "").toLowerCase().includes(s)
+      rows = rows.filter(
+        (r) =>
+          (r.title || "").toLowerCase().includes(s) ||
+          (r.description || "").toLowerCase().includes(s)
       );
     }
 
     if (tag) {
-      rows = rows.filter(r => (r.tags || []).includes(tag));
+      rows = rows.filter((r) => (r.tags || []).includes(tag));
     }
 
     if (dateRange !== "all") {
       const days = parseInt(dateRange, 10);
       const cutoff = dayjs().subtract(days, "day");
-      rows = rows.filter(r => r.createdAt?.toDate && dayjs(r.createdAt.toDate()).isAfter(cutoff));
+      rows = rows.filter((r) => {
+        const ts = r.createdAt?.toDate ? r.createdAt.toDate() : null;
+        if (!ts) return true; // keep docs missing timestamp (just created)
+        return dayjs(ts).isAfter(cutoff);
+      });
     }
 
     return rows;
@@ -65,8 +90,21 @@ export default function FindQuestionsPage() {
 
   const handleDelete = async (id) => {
     if (!window.confirm("Delete this question?")) return;
-    await deleteDoc(doc(db, "posts", id));
+    try {
+      setBusyId(id);
+      await deleteDoc(doc(db, "posts", id));
+    } catch (e) {
+      console.error("Delete failed:", e);
+      alert(e.message);
+    } finally {
+      setBusyId(null);
+    }
   };
+
+  // Gate UI until auth is ready
+  if (!authReady) {
+    return <Container style={{ padding: 24 }}>Loading…</Container>;
+  }
 
   return (
     <Container style={{ paddingTop: 24, paddingBottom: 40 }}>
@@ -85,8 +123,8 @@ export default function FindQuestionsPage() {
           selection
           clearable
           options={allTags}
-          value={tag}
-          onChange={(_, { value }) => setTag(value)}
+          value={tag || null}
+          onChange={(_, { value }) => setTag(value || "")}
           style={{ minWidth: 200 }}
         />
         <Dropdown
@@ -103,27 +141,64 @@ export default function FindQuestionsPage() {
         {filtered.map((q) => {
           const isOwner = user?.uid && user.uid === q.authorUid;
           const isOpen = expanded === q.id;
-          const created = q.createdAt?.toDate ? dayjs(q.createdAt.toDate()).format("DD MMM YYYY") : "—";
+          const created = q.createdAt?.toDate
+            ? dayjs(q.createdAt.toDate()).format("DD MMM YYYY")
+            : "—";
 
           return (
             <Card key={q.id} raised>
-              <Card.Content onClick={() => setExpanded(isOpen ? null : q.id)} style={{ cursor: "pointer" }}>
-                <Card.Header>{q.title}</Card.Header>
-                <Card.Meta>{created}</Card.Meta>
-                <Card.Description>
-                  {isOpen ? q.description : (q.description || "").slice(0, 120) + ((q.description || "").length > 120 ? "…" : "")}
+              <Card.Content>
+                <div
+                  style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    cursor: "pointer",
+                  }}
+                  onClick={() => setExpanded(isOpen ? null : q.id)}
+                >
+                  <div>
+                    <Card.Header style={{ marginBottom: 4 }}>{q.title}</Card.Header>
+                    <Card.Meta>{created}</Card.Meta>
+                  </div>
+                  <Icon name={isOpen ? "chevron up" : "chevron down"} />
+                </div>
+
+                <Card.Description style={{ marginTop: 8, whiteSpace: "pre-wrap" }}>
+                  {isOpen
+                    ? q.description || ""
+                    : (q.description || "").slice(0, 120) +
+                      ((q.description || "").length > 120 ? "…" : "")}
                 </Card.Description>
+
                 <div style={{ marginTop: 8 }}>
                   {(q.tags || []).map((t) => (
-                    <span key={t} style={{ background: "#eef3ff", color: "#0052cc", padding: "4px 8px", borderRadius: 12, marginRight: 6, fontSize: 12 }}>
+                    <span
+                      key={t}
+                      style={{
+                        background: "#eef3ff",
+                        color: "#0052cc",
+                        padding: "4px 8px",
+                        borderRadius: 12,
+                        marginRight: 6,
+                        fontSize: 12,
+                      }}
+                    >
                       #{t}
                     </span>
                   ))}
                 </div>
               </Card.Content>
+
               {isOwner && (
                 <Card.Content extra>
-                  <Button negative icon labelPosition="left" onClick={() => handleDelete(q.id)}>
+                  <Button
+                    negative
+                    icon
+                    labelPosition="left"
+                    loading={busyId === q.id}
+                    onClick={() => handleDelete(q.id)}
+                  >
                     <Icon name="trash" /> Delete
                   </Button>
                 </Card.Content>
